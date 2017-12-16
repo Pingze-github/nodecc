@@ -19,10 +19,10 @@ for (let i = 0; i < 50; i++) {
 const Nodecc = require('../index');
 const nodecc = new Nodecc(task_sleep, queue, 10);
 
-nodecc.run();
 nodecc.on('result', (id, item, result) => {
   console.log(id, item, result);
 });
 nodecc.on('finish', results => {
   console.log(results);
 });
+nodecc.run();
