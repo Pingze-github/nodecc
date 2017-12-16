@@ -24,7 +24,7 @@ Fiber.prototype = {
 };
 
 
-function Nodecc(task, queue, max) {
+function Nodecc(task, queue, max, options) {
   this.task = task;
   this.queue = queue.slice(0);
   this.queueLen = queue.length;
@@ -32,6 +32,7 @@ function Nodecc(task, queue, max) {
   this.fibers = [];
   this.results = [];
   this.eventHub = new EventEmitter();
+  this.options = options || {};
 }
 
 Nodecc.prototype = {
@@ -43,7 +44,6 @@ Nodecc.prototype = {
         this.eventHub.emit('fiberfinished', id);
       });
     }
-    return this;
   },
   on(event, callback) {
     if (event === 'ffinish') {
@@ -56,7 +56,11 @@ Nodecc.prototype = {
       let num = 0;
       this.eventHub.on('result', (_, param, result) => {
         num ++;
-        this.results.push({param, result});
+        if (this.options.onlyResult) {
+          if (typeof result !== 'undefined') this.results.push(result);
+        } else {
+          this.results.push({param, result});
+        }
         if (num === this.queueLen) {
           callback(this.results);
         }

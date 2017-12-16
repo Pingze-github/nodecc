@@ -5,7 +5,7 @@ function sleep(ms) {
   });
 }
 
-async function task(a, b) {
+async function task_sleep(a, b) {
   await sleep(1000);
   return a + b;
 }
@@ -15,9 +15,9 @@ for (let i = 0; i < 50; i++) {
   queue.push([i, i *2]);
 }
 
-const Nodecc = require('./index');
 
-const nodecc = new Nodecc(task, queue, 10);
+const Nodecc = require('../index');
+const nodecc = new Nodecc(task_sleep, queue, 10);
 
 nodecc.run();
 nodecc.on('result', (id, item, result) => {
