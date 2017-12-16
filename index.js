@@ -10,16 +10,19 @@ function Fiber(id, task, queue, eventHub) {
 
 Fiber.prototype = {
   constructor: Fiber,
-  async run() {
-    while (true) {
-      let param = this.queue.shift();
-      if (typeof param === 'undefined') {
-        break;
-      }
-      let result = await this.task.apply(null, param);
-      this.eventHub.emit('result', this.id, param, result)
-    }
-    return this.id;
+  run() {
+    return new Promise(resolve => {
+      const loop = () => {
+        let param = this.queue.shift();
+        if (typeof param === 'undefined') return;
+        this.task.apply(null, param).then(result => {
+          this.eventHub.emit('result', this.id, param, result);
+          loop();
+        });
+      };
+      loop();
+      return resolve(this.id);
+    });
   }
 };
 
@@ -37,7 +40,7 @@ function Nodecc(task, queue, max, options) {
 
 Nodecc.prototype = {
   constructor: Nodecc,
-  async run() {
+  run() {
     for (let i = 0; i < this.max; i++) {
       this.fibers[i] = new Fiber(i, this.task, this.queue, this.eventHub);
       this.fibers[i].run().then(id => {

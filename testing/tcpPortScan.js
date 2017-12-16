@@ -30,12 +30,14 @@ const Nodecc = require('../index');
 const nodecc = new Nodecc(task_tcp_port_scan, queue, 10000);
 
 const start = new Date().getTime();
+const opens = [];
 nodecc.on('finish', results => {
   results.forEach(result => {
     if (result.result === 'connect') {
-        console.log(result.param[1])
+        opens.push(result.param[1]);
     }
   });
   console.log(`检查 ${results.length} 个端口，耗时 ${new Date().getTime() - start} ms`);
+  console.log(`开放端口：`, opens.join(','));
 });
 nodecc.run();
