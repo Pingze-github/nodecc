@@ -27,21 +27,21 @@ Fiber.prototype = {
 };
 
 
-function Nodecc(task, queue, max, options) {
+function Nodecc(task, queue, fmax, pmax) {
   this.task = task;
   this.queue = queue.slice(0);
   this.queueLen = queue.length;
-  this.max = max;
+  this.fmax = fmax;
+  this.pmax = pmax;
   this.fibers = [];
   this.results = [];
   this.eventHub = new EventEmitter();
-  this.options = options || {};
 }
 
 Nodecc.prototype = {
   constructor: Nodecc,
   run() {
-    for (let i = 0; i < this.max; i++) {
+    for (let i = 0; i < this.fmax; i++) {
       this.fibers[i] = new Fiber(i, this.task, this.queue, this.eventHub);
       this.fibers[i].run().then(id => {
         this.eventHub.emit('fiberfinished', id);
@@ -59,11 +59,7 @@ Nodecc.prototype = {
       let num = 0;
       this.eventHub.on('result', (_, param, result) => {
         num ++;
-        if (this.options.onlyResult) {
-          if (typeof result !== 'undefined') this.results.push(result);
-        } else {
-          this.results.push({param, result});
-        }
+        this.results.push({param, result});
         if (num === this.queueLen) {
           callback(this.results);
         }
